@@ -19,21 +19,27 @@ class Perceptron:
         return 1 if self.forward(x) > 0 else 0
 
 
-def run(n_games=10):
+def run(n_games=1):
     env = FlappyBirdEnv()
-    net = Perceptron()
+    nb_perceptron = 100
+    mes_perceptron = []
+    for numero_perceptron in range(nb_perceptron):
+        numero_perceptron = Perceptron()
+        mes_perceptron.append(numero_perceptron)
     scores = []
 
     for i in range(n_games):
         state = env.reset()
         done = False
         while not done:
-            action = net.decide(state)
-            state, reward, done = env.step(action)
-        scores.append(env.score)
-        print(f"Partie {i + 1} : score = {env.score}")
+            for perceptron in mes_perceptron:
+                action = perceptron.decide(state)
+                state, reward, done = env.step(action)
+                scores.append(env.score)
+                print(f"Partie {i + 1} : score = {env.score}")
 
-    print(f"\nScore moyen sur {n_games} parties : {sum(scores) / len(scores):.1f}")
+    print(f"Taille de la liste score : {len(scores)}")
+    print(f"\nScore moyen des {nb_perceptron} perceptron sur {n_games} parties : {sum(scores) / len(scores):.1f}")
 
 if __name__ == '__main__':
     run()
