@@ -38,8 +38,17 @@ def run(n_games=1):
                 scores.append(env.score)
                 print(f"Partie {i + 1} : score = {env.score}")
 
-    print(f"Taille de la liste score : {len(scores)}")
+    #print(f"Taille de la liste score : {len(scores)}")
     print(f"\nScore moyen des {nb_perceptron} perceptron sur {n_games} parties : {sum(scores) / len(scores):.1f}")
+
+    best_score = max(scores)
+    index_best_score = scores.index(best_score)
+    #print(f"index du meilleur score dans la liste des scores = {scores.index(index_best_score)}")
+    #print(f"score du meilleur perceptron perceptron = {best_score}")
+
+    best_perceptron = mes_perceptron[index_best_score]
+    
+    print(f"poids du meilleur perceptron = {best_perceptron.weights}")
 
 if __name__ == '__main__':
     run()
