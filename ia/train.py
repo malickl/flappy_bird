@@ -27,19 +27,28 @@ def evaluate_genome(genome, config):
 
 
 def eval_genomes(genomes, config):
+    score_genome = 0
     for genome_id, genome in genomes:
         genome.fitness = evaluate_genome(genome, config)
+        if genome.fitness > score_genome:
+            score_genome = genome.fitness
+            best_genome_de_la_gen = genome
+    #print(f"le meilleur genome de la gen est : {best_genome_de_la_gen}")
+    genome_path = os.path.join(os.path.dirname(__file__), f'best_genome_par_gen/best_genome{genome.fitness}.pkl')
+    with open(genome_path, 'wb') as f:
+        pickle.dump(best_genome_de_la_gen, f)
 
 
 def plot_stats(stats, output_path):
     generations = range(len(stats.most_fit_genomes))
     best_fitness = [g.fitness for g in stats.most_fit_genomes]
     avg_fitness = stats.get_fitness_mean()
+
     liste_species = stats.get_species_sizes()
     nb_species = []
     for gen in liste_species:
         nb_species.append(len(gen))
-    print(nb_species)
+    #print(nb_species)
 
     plt.figure(figsize=(10, 5))
     plt.plot(generations, best_fitness, label='Fitness maximale')
