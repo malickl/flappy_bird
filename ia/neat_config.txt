@@ -6,9 +6,9 @@ reset_on_extinction   = True
 no_fitness_termination = False
 
 [DefaultGenome]
-activation_default      = tanh
+activation_default      = relu
 activation_mutate_rate  = 0.0
-activation_options      = tanh
+activation_options      = relu
 
 aggregation_default     = sum
 aggregation_mutate_rate = 0.0

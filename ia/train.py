@@ -2,6 +2,7 @@ import sys
 import os
 import neat
 import pickle
+import matplotlib.pyplot as plt
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'game'))
 
@@ -12,7 +13,6 @@ N_GENERATIONS = 100
 
 
 def evaluate_genome(genome, config):
-    nb_saut = 0
     net = neat.nn.FeedForwardNetwork.create(genome, config)
     env = FlappyBirdEnv()
     state = env.reset()
@@ -22,22 +22,37 @@ def evaluate_genome(genome, config):
         output = net.activate(state)
         action = 1 if output[0] > 0.5 else 0
         state, reward, done = env.step(action)
-        if action == 1:
-            nb_saut +=1
-            
 
-    # frames survécus + 500 * tuyaux franchis
-    return env.frames + 1500 * env.score - (nb_saut * -0.1)
+    return env.frames + 500 * env.score
 
 
 def eval_genomes(genomes, config):
-    best_score_gen = 0
     for genome_id, genome in genomes:
         genome.fitness = evaluate_genome(genome, config)
-        score = (genome.fitness-0)//500
-        if score > best_score_gen:
-            best_score_gen = score
-    print(f"meilleur score = {best_score_gen}")
+
+
+def plot_stats(stats, output_path):
+    generations = range(len(stats.most_fit_genomes))
+    best_fitness = [g.fitness for g in stats.most_fit_genomes]
+    avg_fitness = stats.get_fitness_mean()
+    liste_species = stats.get_species_sizes()
+    nb_species = []
+    for gen in liste_species:
+        nb_species.append(len(gen))
+    print(nb_species)
+
+    plt.figure(figsize=(10, 5))
+    plt.plot(generations, best_fitness, label='Fitness maximale')
+    plt.plot(generations, avg_fitness, label='Fitness moyenne')
+    plt.plot(generations,nb_species, label='Nombre espece par gen')
+    plt.xlabel('Generation')
+    plt.ylabel('Fitness')
+    plt.title('Evolution de la fitness par generation')
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig(output_path)
+    plt.close()
+    print(f"Courbe sauvegardee dans {output_path}")
 
 
 def run():
@@ -56,18 +71,20 @@ def run():
 
     os.makedirs(os.path.join(os.path.dirname(__file__), 'checkpoints'), exist_ok=True)
     checkpointer = neat.Checkpointer(
-        generation_interval=5,
+        generation_interval=10,
         filename_prefix=os.path.join(os.path.dirname(__file__), 'checkpoints', 'checkpoint-')
     )
     population.add_reporter(checkpointer)
 
     best = population.run(eval_genomes, N_GENERATIONS)
 
-    output_path = os.path.join(os.path.dirname(__file__), 'best_genome.pkl')
-    with open(output_path, 'wb') as f:
+    genome_path = os.path.join(os.path.dirname(__file__), 'best_genome.pkl')
+    with open(genome_path, 'wb') as f:
         pickle.dump(best, f)
 
-    print(f"\nMeilleur genome sauvegarde dans {output_path}")
+    plot_stats(stats, os.path.join(os.path.dirname(__file__), 'fitness_courbe.png'))
+
+    print(f"\nMeilleur genome sauvegarde dans {genome_path}")
     print(f"Fitness du meilleur genome : {best.fitness:.1f}")
 
 
